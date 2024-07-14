@@ -21,16 +21,24 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     
-    @action(detail=False)
-    def by_category(self, request):
-        category = self.request.query_params.get('category', None) # Asigna el valor del parámetro de consulta 'category' de la solicitud
-                                                                    #a la variable 'category'. Si el parámetro de consulta 'category' 
-                                                                    # no está presente en la solicitud, asigna el valor 'None' a la variable.
-                                                                    # Es decir, en un ruta 'http://127.0.0.1:8000/api/products/by_category/?category=1'
-                                                                    # busca el valor despues de ?category= y se lo asigna a la variable category
-        products = Product.objects.filter(category = category)
-        serializer = ProductSerializer(products, many = True) # creates a ProductSerializer instance and passes the filtered products queryset to it. The many=True argument indicates that the serializer should expect a list of objects.
-        return Response(serializer.data)
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        category = self.request.query_params.get('category')
+        if category:
+            queryset = queryset.filter(category=category)
+        return queryset
+    
+    # Este filtro lo reemplacé por la definición de arriba de get_queryset arriba
+    # @action(detail=False)
+    # def by_category(self, request):
+    #     category = self.request.query_params.get('category', None) # Asigna el valor del parámetro de consulta 'category' de la solicitud
+    #                                                                 #a la variable 'category'. Si el parámetro de consulta 'category' 
+    #                                                                 # no está presente en la solicitud, asigna el valor 'None' a la variable.
+    #                                                                 # Es decir, en un ruta 'http://127.0.0.1:8000/api/products/by_category/?category=1'
+    #                                                                 # busca el valor despues de ?category= y se lo asigna a la variable category
+    #     products = Product.objects.filter(category = category)
+    #     serializer = ProductSerializer(products, many = True) # creates a ProductSerializer instance and passes the filtered products queryset to it. The many=True argument indicates that the serializer should expect a list of objects.
+    #     return Response(serializer.data)
     
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
